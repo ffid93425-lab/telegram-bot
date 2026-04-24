@@ -1,23 +1,36 @@
 import telebot
 import os
 
-TOKEN = 8639479910:AAHa46W55joY7ryjx59HayJiJif017ltBaU
+TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
+
+# Check if user is admin
+def is_admin(chat_id, user_id):
+    try:
+        member = bot.get_chat_member(chat_id, user_id)
+        return member.status in ["administrator", "creator"]
+    except:
+        return False
 
 @bot.message_handler(commands=['anouce'])
 def announce(message):
+    # Admin check
+    if not is_admin(message.chat.id, message.from_user.id):
+        return
+
+    # Must reply to a message
+    if not message.reply_to_message:
+        bot.reply_to(message, "❌ Reply to message first.")
+        return
+
+    args = message.text.split()
+
+    if len(args) < 2:
+        bot.reply_to(message, "❌ Use:\n/anouce https://t.me/channelusername")
+        return
+
     try:
-        if not message.reply_to_message:
-            bot.reply_to(message, "❌ Reply to message first.")
-            return
-        
-        args = message.text.split()
-        if len(args) < 2:
-            bot.reply_to(message, "❌ Use:\n/anouce https://t.me/channelusername")
-            return
-        
-        url = args[1]
-        chat_username = "@" + url.split("t.me/")[1]
+        chat_username = "@" + args[1].split("t.me/")[1]
 
         bot.forward_message(
             chat_username,
