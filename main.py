@@ -4,18 +4,11 @@ import os
 TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
 
-# Check if user is admin
-def is_admin(chat_id, user_id):
-    try:
-        member = bot.get_chat_member(chat_id, user_id)
-        return member.status in ["administrator", "creator"]
-    except:
-        return False
-
 @bot.message_handler(commands=['anouce'])
 def announce(message):
-    # Admin check
-    if not is_admin(message.chat.id, message.from_user.id):
+
+    # ✅ Only allow in private chat (DM)
+    if message.chat.type != "private":
         return
 
     # Must reply to a message
